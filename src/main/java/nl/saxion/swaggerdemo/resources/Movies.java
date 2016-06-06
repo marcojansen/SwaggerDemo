@@ -1,8 +1,8 @@
 package nl.saxion.swaggerdemo.resources;
 
-import nl.saxion.swaggerdemo.exception.NotFoundException;
 import nl.saxion.swaggerdemo.model.Model;
 import nl.saxion.swaggerdemo.model.Movie;
+import nl.saxion.swaggerdemo.model.ErrorResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -27,14 +27,13 @@ public class Movies {
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Path("/{movieId}")
     public Response getOrderById(
-            @PathParam("movieId") int movieId)
-            throws NotFoundException {
+            @PathParam("movieId") int movieId) {
         Movie m = model.getMovieById(movieId);
         System.out.println(model.getMovieById(movieId) + " " + movieId);
         if (null != m) {
             return Response.ok().entity(m).build();
         } else {
-            throw new NotFoundException(404, "movie not found");
+            return Response.status(404).entity(new ErrorResponse("Movie not found")).build();
         }
     }
 
@@ -52,7 +51,7 @@ public class Movies {
     @DELETE
     public Response deleteMovie (@FormParam("movieId") int movieId) {
         if (model.getMovieById(movieId) == null) {
-            return Response.status(406).build();
+            return Response.status(406).entity(new ErrorResponse("Movie with supplied id not found")).build();
         } else {
             model.getMovies().remove(model.getMovieById(movieId));
         }
@@ -68,7 +67,7 @@ public class Movies {
                                 @FormParam("movieDesc") String movieDesc) {
         Movie movieToChange = model.getMovieById(movieId);
         if (movieToChange == null) {
-            return Response.status(406).build();
+            return Response.status(406).entity(new ErrorResponse("Movie with supplied id not found")).build();
         } else {
             movieToChange.setName(movieTitle);
             movieToChange.setLength(movieLength);

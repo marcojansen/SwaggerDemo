@@ -1,5 +1,6 @@
 package nl.saxion.swaggerdemo.resources;
 
+import nl.saxion.swaggerdemo.model.ErrorResponse;
 import nl.saxion.swaggerdemo.model.Model;
 import nl.saxion.swaggerdemo.model.Movie;
 import nl.saxion.swaggerdemo.model.Review;
@@ -31,7 +32,7 @@ public class Reviews {
             m.addReview(r);
             return Response.ok().entity(r).build();
         }
-        return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+        return Response.status(Response.Status.NOT_ACCEPTABLE).entity(new ErrorResponse("Movie with supplied id not found")).build();
 
     }
 
@@ -40,11 +41,10 @@ public class Reviews {
     public Response deleteReview (
             @FormParam("movieId") int movieId,
             @FormParam("reviewId") int reviewId) {
-        boolean success = model.removeReviewById(movieId, reviewId);
-        if (success) {
+        if (model.removeReviewById(movieId, reviewId)) {
             return Response.ok().build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse("Movie or review with supplied id not found")).build();
         }
     }
 }
