@@ -46,16 +46,16 @@ public class Model {
         getMovieById(r.getMovieId()).removeReview(r);
     }
 
-    public boolean removeReviewById(int movieId, int reviewId) {
+    public Review removeReviewById(int movieId, int reviewId) {
         Movie m = getMovieById(movieId);
         if (m != null) {
             Review r = m.getReviewById(reviewId);
             if (r != null) {
                 m.removeReview(r);
-                return true;
+                return r;
             }
         }
-        return false;
+        return null;
     }
 
 

@@ -1,13 +1,16 @@
 package nl.saxion.swaggerdemo.resources;
 
-import nl.saxion.swaggerdemo.model.ErrorResponse;
 import nl.saxion.swaggerdemo.model.Model;
 import nl.saxion.swaggerdemo.model.Movie;
 import nl.saxion.swaggerdemo.model.Review;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+
 /**
  * Created by MarcoJansen on 01-06-16.
  */
@@ -19,10 +22,11 @@ public class Reviews {
 
     @POST
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public Response postReview(
+    public Review postReview(
             @FormParam("rating") int rating,
             @FormParam("movieId") int movieId,
-            @FormParam("reviewDesc") String reviewDesc) {
+            @FormParam("reviewDesc") String reviewDesc,
+            @Context final HttpServletResponse response) throws IOException {
 
         Movie m = model.getMovieById(movieId);
 
@@ -30,21 +34,28 @@ public class Reviews {
             String description = reviewDesc == null ? "" : reviewDesc;
             Review r = new Review(movieId, rating, description);
             m.addReview(r);
-            return Response.ok().entity(r).build();
+            response.setStatus(200);
+            response.flushBuffer();
+            return r;
         }
-        return Response.status(Response.Status.NOT_ACCEPTABLE).entity(new ErrorResponse("Movie with supplied id not found")).build();
-
+        response.sendError(400, "Bad request, movie with id not found");
+        return null;
     }
 
 
     @DELETE
-    public Response deleteReview (
+    public Review deleteReview (
             @FormParam("movieId") int movieId,
-            @FormParam("reviewId") int reviewId) {
-        if (model.removeReviewById(movieId, reviewId)) {
-            return Response.ok().build();
+            @FormParam("reviewId") int reviewId,
+            @Context final HttpServletResponse response) throws IOException {
+        Review r = model.removeReviewById(movieId, reviewId);
+        if (r != null) {
+            response.setStatus(200);
+            response.flushBuffer();
+            return r;
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse("Movie or review with supplied id not found")).build();
+            response.sendError(400, "movie or review with this id doesn't exist");
+            return null;
         }
     }
 }

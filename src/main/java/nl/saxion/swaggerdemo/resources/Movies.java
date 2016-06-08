@@ -2,11 +2,12 @@ package nl.saxion.swaggerdemo.resources;
 
 import nl.saxion.swaggerdemo.model.Model;
 import nl.saxion.swaggerdemo.model.Movie;
-import nl.saxion.swaggerdemo.model.ErrorResponse;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -26,53 +27,70 @@ public class Movies {
     @GET
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Path("/{movieId}")
-    public Response getOrderById(
-            @PathParam("movieId") int movieId) {
+    public Movie getOrderById(
+            @PathParam("movieId") int movieId, @Context final HttpServletResponse response) throws IOException {
         Movie m = model.getMovieById(movieId);
-        System.out.println(model.getMovieById(movieId) + " " + movieId);
-        if (null != m) {
-            return Response.ok().entity(m).build();
+
+
+        if(m != null) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.flushBuffer();
+            return m;
         } else {
-            return Response.status(404).entity(new ErrorResponse("Movie not found")).build();
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Movie with this id does not exist");
+            response.flushBuffer();
+            return null;
         }
     }
 
     @POST
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public Response postMovie(
+    public Movie postMovie(
             @FormParam("movieName") String movieName,
             @FormParam("movieLength") int movieLength,
-            @FormParam("movieDesc") String movieDesc) {
+            @FormParam("movieDesc") String movieDesc,
+            @Context final HttpServletResponse response) throws IOException {
         Movie movie = new Movie(movieName, movieLength, movieDesc);
         model.getMovies().add(movie);
-        return Response.ok().entity(movie).build();
+
+        response.setStatus(HttpServletResponse.SC_CREATED);
+        response.flushBuffer();
+        return movie;
     }
 
     @DELETE
-    public Response deleteMovie (@FormParam("movieId") int movieId) {
-        if (model.getMovieById(movieId) == null) {
-            return Response.status(406).entity(new ErrorResponse("Movie with supplied id not found")).build();
+    public Movie deleteMovie (@FormParam("movieId") int movieId,
+                                 @Context final HttpServletResponse response) throws IOException {
+        Movie toDelete = model.getMovieById(movieId);
+        if (toDelete == null) {
+            response.sendError(400, "Movie with this id not found");
+            return null;
         } else {
-            model.getMovies().remove(model.getMovieById(movieId));
+            model.getMovies().remove(toDelete);
+            response.setStatus(200);
+            response.flushBuffer();
+            return toDelete;
         }
-        return Response.ok().build();
-
     }
 
     @PUT
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public Response updateMovie(@FormParam("movieId") int movieId,
+    public Movie updateMovie(@FormParam("movieId") int movieId,
                                 @FormParam("movieTitle") String movieTitle,
                                 @FormParam("movieLength") int movieLength,
-                                @FormParam("movieDesc") String movieDesc) {
+                                @FormParam("movieDesc") String movieDesc,
+                                @Context final HttpServletResponse response) throws IOException {
         Movie movieToChange = model.getMovieById(movieId);
         if (movieToChange == null) {
-            return Response.status(406).entity(new ErrorResponse("Movie with supplied id not found")).build();
+            response.sendError(400, "Movie with this id not found");
+            return null;
         } else {
             movieToChange.setName(movieTitle);
             movieToChange.setLength(movieLength);
             movieToChange.setDescription(movieDesc);
-            return Response.ok().entity(movieToChange).build();
+            response.setStatus(200);
+            response.flushBuffer();
+            return movieToChange;
         }
 
     }
