@@ -28,7 +28,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Tomcat 8.0.33" level="application_server_libraries" />
-    <orderEntry type="library" name="Jersey-2.2" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-bundle:1.19.1" level="project" />
     <orderEntry type="library" name="Maven: javax.ws.rs:jsr311-api:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-json:1.19.1" level="project" />
