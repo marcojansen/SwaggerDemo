@@ -1,5 +1,6 @@
 package nl.saxion.swaggerdemo.resources;
 
+import io.swagger.annotations.Api;
 import nl.saxion.swaggerdemo.model.Model;
 import nl.saxion.swaggerdemo.model.Movie;
 import nl.saxion.swaggerdemo.model.Review;
@@ -15,6 +16,7 @@ import java.io.IOException;
  */
 
 @Path("/reviews")
+@Api(value = "Reviews")
 @Produces({"application/json", "application/xml"})
 public class Reviews {
     private Model model = Model.getInstance();
